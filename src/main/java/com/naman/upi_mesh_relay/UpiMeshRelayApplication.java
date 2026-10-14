@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @SpringBootApplication
 public class UpiMeshRelayApplication {
@@ -18,14 +18,39 @@ public class UpiMeshRelayApplication {
 
 	@Bean
 	public CommandLineRunner commandLineRunner(AccountDAO accountDAO) {
-		return runner -> createAccount(accountDAO);
+		return runner -> {
+			readAccount(accountDAO);
+			queryForAccounts(accountDAO);
+			queryByVpa(accountDAO);
+		};
 	}
 
-	private void createAccount(AccountDAO accountDAO) {
-		Account account = new Account("naman@upi", "Naman", new BigDecimal("1000.00"));
+	private void readAccount(AccountDAO accountDAO) {
+		System.out.println("--- findById ---");
 
-		System.out.println("Saving account...");
-		accountDAO.save(account);
-		System.out.println("Saved. Generated id: " + account.getId());
+		Account found = accountDAO.findById(1);
+		System.out.println("Found: " + found);
+
+		Account missing = accountDAO.findById(999);
+		System.out.println("Id 999: " + (missing == null ? "not found" : missing));
+	}
+
+	private void queryForAccounts(AccountDAO accountDAO) {
+		System.out.println("--- findAll ---");
+
+		List<Account> accounts = accountDAO.findAll();
+		for (Account account : accounts) {
+			System.out.println(account);
+		}
+	}
+
+	private void queryByVpa(AccountDAO accountDAO) {
+		System.out.println("--- findByVpa ---");
+
+		Account found = accountDAO.findByVpa("meera@upi");
+		System.out.println("meera@upi: " + (found == null ? "not found" : found));
+
+		Account missing = accountDAO.findByVpa("nobody@upi");
+		System.out.println("nobody@upi: " + (missing == null ? "not found" : missing));
 	}
 }
